@@ -71,7 +71,14 @@ public class SocketClient {
             out.println(f1data.getData());
             // ako e ok trebit da dobiet response ANonce
 
+
             String f1response = in.readLine();
+
+            if(f1response == null || f1response.equals("terminate")){
+                logger.error("Incorrect password, closing connection");
+                socket.close();
+                System.exit(0);
+            }
             ANonce = Base64.getDecoder().decode(DataPacket.parse(f1response)[0]);
             SNonce = CCMPImpl.generateNonce();
 

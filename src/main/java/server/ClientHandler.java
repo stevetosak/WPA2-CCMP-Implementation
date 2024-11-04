@@ -140,6 +140,7 @@ public class ClientHandler extends Thread {
             } catch (Exception e) {
                 logger.error("Server Connection failed");
                 terminate(out);
+                return;
             }
 
             for (int i = 0; i < 10; i++) {
