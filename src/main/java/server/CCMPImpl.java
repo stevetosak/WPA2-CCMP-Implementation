@@ -7,7 +7,6 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -19,7 +18,7 @@ public class CCMPImpl {
     private final Logger logger = LogManager.getLogger(CCMPImpl.class.getName());
 
     // ova vo dr klasa
-    public static byte[] generateMIC4Way(byte[] kck, byte[] message) throws Exception {
+    public static byte[] generateHandshakeMic(byte[] kck, byte[] message) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(kck, "RAW");
 
         Mac mac = Mac.getInstance("HmacSHA1");
@@ -33,7 +32,7 @@ public class CCMPImpl {
     }
 
 
-    static byte[] generateMIC(Frame frame,byte[] key,byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] generateMIC(byte[] msg,byte[] key,byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         //aes-cbc
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -41,26 +40,22 @@ public class CCMPImpl {
         Cipher encryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
 
-        return encryptCipher.doFinal(frame.get("payload"));
+        return encryptCipher.doFinal(msg);
     }
 
-    static ClearTextFrame decrypt(EncryptedFrame frame,byte[] key,byte[] iv) throws Exception{
+    public static byte[] decrypt(byte[] msg,byte[] key,byte[] iv) throws Exception{
 
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
         Cipher decryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
         decryptCipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
-        byte[] decryptedBytes = decryptCipher.doFinal(frame.get("payload"));
+        byte[] decryptedBytes = decryptCipher.doFinal(msg);
 
-        String decryptedText = new String(decryptedBytes);
-        System.out.println("Decrypted Text: " + decryptedText);
 
-        ClearTextFrame resp = new ClearTextFrame();
-        resp.set("payload",decryptedText.getBytes(StandardCharsets.UTF_8));
-        return resp;
+        return decryptedBytes;
     }
 
-    static EncryptedFrame encrypt(ClearTextFrame frame,byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] encrypt(byte[]msg,byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -68,27 +63,27 @@ public class CCMPImpl {
 
         Cipher encryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
         encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
-        byte[] encryptedBytes = encryptCipher.doFinal(frame.get("payload"));
+        byte[] encryptedBytes = encryptCipher.doFinal(msg);
 
-        EncryptedFrame encryptedFrame = new EncryptedFrame();
-        encryptedFrame.set("payload",encryptedBytes);
+//        EncryptedFrame encryptedFrame = new EncryptedFrame();
+//        encryptedFrame.set("payload",encryptedBytes);
 
-        return encryptedFrame;
+        return encryptedBytes;
     }
 
-    static byte[] computeKey(String password, byte[] salt,int keyLength) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] computeKey(String password, byte[] salt,int keyLength) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt,4096,keyLength);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         return skf.generateSecret(spec).getEncoded(); //pmk
     }
-    static byte[] generateNonce(){
+    public static byte[] generateNonce(){
         SecureRandom sr = new SecureRandom();
         byte[] nonce = new byte[32];
         sr.nextBytes(nonce);
         return nonce;
     }
 
-    static boolean validate(String mic1,String mic2){
+    public static boolean validate(String mic1,String mic2){
         return mic1.equals(mic2);
     }
 
