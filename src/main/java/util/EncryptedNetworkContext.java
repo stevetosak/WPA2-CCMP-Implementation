@@ -32,16 +32,17 @@ public class EncryptedNetworkContext {
         this.logger = logger;
     }
 
-    public void EncryptAndSendMessage(PrintWriter out, byte[] iv, byte[] packetNumber, String message) throws Exception{
+    public void encryptAndSendMessage(PrintWriter out, byte[] iv, byte[] packetNumber, String message) throws Exception{
         DataPacket respDataPacket = new DataPacket();
 
         byte[] respMIC = CCMPImpl.generateMIC(message.getBytes(),PTK.TK,iv);
+        //message = "hehe smenato e";
         byte[] encryptedMsg = CCMPImpl.encrypt(message.getBytes(),PTK.TK,iv);
 
         byte [] encryptedMIC = CCMPImpl.encrypt(respMIC,PTK.TK,iv);
 
-        String b64msg = Base64.getEncoder().encodeToString(encryptedMsg);
-        String b64mic = Base64.getEncoder().encodeToString(encryptedMIC);
+        //tuka simulacija nekoj ako ja smenal porakata
+
 
         respDataPacket.add(Base64.getEncoder().encodeToString(encryptedMsg));
         respDataPacket.add(ByteUtil.convertBytesToHex(packetNumber));
@@ -78,9 +79,14 @@ public class EncryptedNetworkContext {
             throw new SecurityException("Possible replay attack. Packet number: " + packetNumber + "was previously encountered");
         }
 
-        if(!CCMPImpl.validate(Base64.getEncoder().encodeToString(decryptedMIC), Base64.getEncoder().encodeToString(respMIC))){
-            System.out.println("MIC: NOT VALID: " + Base64.getEncoder().encodeToString(respMIC) + " " + Base64.getEncoder().encodeToString(decryptedMIC));
+        String b64mic1 = Base64.getEncoder().encodeToString(decryptedMIC);
+        String b64mic2 = Base64.getEncoder().encodeToString(respMIC);
+
+        if(!CCMPImpl.validate(b64mic1,b64mic2)){
+            throw new SecurityException("MIC DO NOT MATCH: mic1: " + b64mic1 + " mic2: " + b64mic2);
         }
+
+        logger.info("Success! MIC MATCH: mic1: " + b64mic1 + " mic2: " + b64mic2);
 
         logger.info("Message decrypted successfully! Receiving...");
 

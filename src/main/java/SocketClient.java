@@ -155,8 +155,8 @@ public class SocketClient {
             Random r = new Random();
 
             while (!socket.isClosed()) {
-                //input = consoleReader.readLine();
-                input = messages[r.nextInt(messages.length)];
+                input = consoleReader.readLine();
+                //input = messages[r.nextInt(messages.length)];
                 if (input == null || input.isEmpty()) {
                     System.out.println("empty input, try again");
                     continue;
@@ -167,7 +167,7 @@ public class SocketClient {
                 System.arraycopy(packetNumber, 0, iv, 0, 6);
                 System.arraycopy(SNonce, 0, iv, 6, 10);
 
-                encryptedNetworkContext.EncryptAndSendMessage(out,iv,packetNumber,input);
+                encryptedNetworkContext.encryptAndSendMessage(out,iv,packetNumber,input);
 
                 String receivedMessage = encryptedNetworkContext.receiveAndDecryptMessage(in,iv);
                 System.out.println("Server: " + receivedMessage);
@@ -176,7 +176,7 @@ public class SocketClient {
                     return;
                 }
 
-                Thread.sleep(1000);
+                //Thread.sleep(1000);
 
             }
         } catch (Exception e) {

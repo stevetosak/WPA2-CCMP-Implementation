@@ -176,12 +176,15 @@ public class ClientHandler extends Thread {
                 String responseMsg = "Successfully Received Message from Address: "
                         + CLIENT_MAC_ADDRESS + " Packet Number: " + ByteUtil.convertBytesToHex(packetNumber);
 
-                encryptedNetworkContext.EncryptAndSendMessage(out,iv,packetNumber,responseMsg);
+                encryptedNetworkContext.encryptAndSendMessage(out,iv,packetNumber,responseMsg);
 
             }
 
 
         } catch (Exception e) {
+            socket.close();
+            logger.error(e.getMessage());
+            logger.warn("Connection with: " + socket.getRemoteSocketAddress() + " closed");
         }
 
     }
