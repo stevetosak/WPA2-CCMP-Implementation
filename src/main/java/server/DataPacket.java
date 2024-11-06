@@ -1,16 +1,18 @@
 package server;
 
-import javax.xml.crypto.Data;
-
 public class DataPacket {
-    StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder data = new StringBuilder();
 
     public void add(String data){
-        stringBuilder.append(data).append(":");
+        this.data.append(data).append(":");
     }
 
     public String getData(){
-        return stringBuilder.toString();
+        return data.deleteCharAt(data.lastIndexOf(":")).toString();
+    }
+
+    public void place(String data){ // place already formatted string
+        this.data = new StringBuilder(data);
     }
 
     public static String[] parse(String data){

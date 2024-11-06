@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.Base64;
+import java.util.Random;
 
 public class SocketClient {
 
@@ -71,6 +72,8 @@ public class SocketClient {
             out.println(f1data.getData());
             // ako e ok trebit da dobiet response ANonce
 
+            logger.info("First Step of Handshake: CLIENT: Connect with login information");
+
 
             String f1response = in.readLine();
 
@@ -79,6 +82,8 @@ public class SocketClient {
                 socket.close();
                 System.exit(0);
             }
+
+
             ANonce = Base64.getDecoder().decode(DataPacket.parse(f1response)[0]);
             SNonce = CCMPImpl.generateNonce();
 
@@ -116,6 +121,8 @@ public class SocketClient {
 
             String f3response = in.readLine();
 
+            logger.info("Third Step of Handshake[0] CLIENT: Compare generated MIC with received MIC");
+
 
             String APMIC = DataPacket.parse(f3response)[0];
 
@@ -137,14 +144,19 @@ public class SocketClient {
                 return;
             }
 
-            System.out.println("Connected to the server.");
+            logger.info("Connected to the server.");
 
             String input;
 
-            EncryptedNetworkContext encryptedNetworkContext = new EncryptedNetworkContext(PTK,MAC_ADDRESS,AP_MAC_ADDRESS,packetNumber);
+            EncryptedNetworkContext encryptedNetworkContext = new EncryptedNetworkContext(PTK,MAC_ADDRESS,AP_MAC_ADDRESS,packetNumber,logger);
+
+            String[] messages = {"Hello","Jak Dorucak","Royal Burger 2", "Donald Trump 2024", "Teteks"};
+
+            Random r = new Random();
 
             while (!socket.isClosed()) {
-                input = consoleReader.readLine();
+                //input = consoleReader.readLine();
+                input = messages[r.nextInt(messages.length)];
                 if (input == null || input.isEmpty()) {
                     System.out.println("empty input, try again");
                     continue;
@@ -163,6 +175,8 @@ public class SocketClient {
                 if (receivedMessage == null || receivedMessage.equals("terminate")){
                     return;
                 }
+
+                Thread.sleep(1000);
 
             }
         } catch (Exception e) {

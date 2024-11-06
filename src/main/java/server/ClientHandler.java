@@ -101,6 +101,7 @@ public class ClientHandler extends Thread {
                 String[] f2dataParts = DataPacket.parse(f2resp);
 
                 String clientMIC = f2dataParts[0];
+
                 this.SNonce = Base64.getDecoder().decode(f2dataParts[1]);
 
                 System.out.println("SNONCE " + Base64.getEncoder().encodeToString(this.SNonce));
@@ -153,7 +154,7 @@ public class ClientHandler extends Thread {
 
             out.println("Connected");
 
-            EncryptedNetworkContext encryptedNetworkContext = new EncryptedNetworkContext(PTK,CLIENT_MAC_ADDRESS,MAC_ADDRESS,packetNumber);
+            EncryptedNetworkContext encryptedNetworkContext = new EncryptedNetworkContext(PTK,CLIENT_MAC_ADDRESS,MAC_ADDRESS,packetNumber,logger);
 
             while (true) {
                 ByteUtil.incrementBytes(packetNumber);
