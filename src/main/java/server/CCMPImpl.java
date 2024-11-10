@@ -2,6 +2,7 @@ package server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import util.ByteUtil;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -34,6 +35,8 @@ public class CCMPImpl {
 
     public static byte[] generateMIC(byte[] msg,byte[] key,byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         //aes-cbc
+        System.arraycopy(new byte[]{0x03,0x03,0x03},0,iv,13,3);
+
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
@@ -44,6 +47,8 @@ public class CCMPImpl {
     }
 
     public static byte[] decrypt(byte[] msg,byte[] key,byte[] iv) throws Exception{
+
+        System.arraycopy(new byte[]{0x00,0x00,0x00},0,iv,13,3);
 
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -56,10 +61,10 @@ public class CCMPImpl {
     }
 
     public static byte[] encrypt(byte[]msg,byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        System.arraycopy(new byte[]{0x00,0x00,0x00},0,iv,13,3);
 
         SecretKey secretKey = new SecretKeySpec(key, "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
 
         Cipher encryptCipher = Cipher.getInstance("AES/CTR/NoPadding");
         encryptCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);

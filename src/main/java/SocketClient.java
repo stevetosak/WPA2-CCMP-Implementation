@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Random;
 
@@ -135,8 +136,6 @@ public class SocketClient {
             }
 
 
-            // DO TUKA NOV KOD
-            //out.println(password);
             String connResponse = in.readLine();
 
             if (connResponse.equals("terminate")) {
@@ -150,9 +149,7 @@ public class SocketClient {
 
             EncryptedNetworkContext encryptedNetworkContext = new EncryptedNetworkContext(PTK,MAC_ADDRESS,AP_MAC_ADDRESS,packetNumber,logger);
 
-            String[] messages = {"Hello","Jak Dorucak","Royal Burger 2", "Donald Trump 2024", "Teteks"};
-
-            Random r = new Random();
+            SecureRandom r = new SecureRandom();
 
             while (!socket.isClosed()) {
                 input = consoleReader.readLine();
@@ -163,13 +160,14 @@ public class SocketClient {
                 }
 
                 ByteUtil.incrementBytes(packetNumber);
-                byte[] iv = new byte[16];
-                System.arraycopy(packetNumber, 0, iv, 0, 6);
-                System.arraycopy(SNonce, 0, iv, 6, 10);
 
-                encryptedNetworkContext.encryptAndSendMessage(out,iv,packetNumber,input);
+                byte[] nonce = new byte[16];
+                System.arraycopy(packetNumber, 0, nonce, 0, 6);
+                System.arraycopy(MAC_ADDRESS.getBytes(),0,nonce,6,6);
 
-                String receivedMessage = encryptedNetworkContext.receiveAndDecryptMessage(in,iv);
+                encryptedNetworkContext.encryptAndSendMessage(out,nonce,packetNumber,input);
+
+                String receivedMessage = encryptedNetworkContext.receiveAndDecryptMessage(in,nonce);
                 System.out.println("Server: " + receivedMessage);
 
                 if (receivedMessage == null || receivedMessage.equals("terminate")){

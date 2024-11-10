@@ -21,6 +21,8 @@ public class EncryptedNetworkContext {
     String AP_MAC_ADDRESS;
     byte[] packetNumber;
 
+    byte[] QoS = new byte[]{0x1};
+
     Logger logger;
 
 
@@ -32,17 +34,17 @@ public class EncryptedNetworkContext {
         this.logger = logger;
     }
 
-    public void encryptAndSendMessage(PrintWriter out, byte[] iv, byte[] packetNumber, String message) throws Exception{
+    public void encryptAndSendMessage(PrintWriter out, byte[] nonce, byte[] packetNumber, String message) throws Exception{
+        System.arraycopy(QoS,0,nonce,12,1);
+
+        byte[] respMIC = CCMPImpl.generateMIC(message.getBytes(),PTK.TK,nonce);
+
         DataPacket respDataPacket = new DataPacket();
 
-        byte[] respMIC = CCMPImpl.generateMIC(message.getBytes(),PTK.TK,iv);
         //message = "hehe smenato e";
-        byte[] encryptedMsg = CCMPImpl.encrypt(message.getBytes(),PTK.TK,iv);
+        byte[] encryptedMsg = CCMPImpl.encrypt(message.getBytes(),PTK.TK,nonce);
 
-        byte [] encryptedMIC = CCMPImpl.encrypt(respMIC,PTK.TK,iv);
-
-        //tuka simulacija nekoj ako ja smenal porakata
-
+        byte [] encryptedMIC = CCMPImpl.encrypt(respMIC,PTK.TK,nonce);
 
         respDataPacket.add(Base64.getEncoder().encodeToString(encryptedMsg));
         respDataPacket.add(ByteUtil.convertBytesToHex(packetNumber));
@@ -59,6 +61,9 @@ public class EncryptedNetworkContext {
         if(response == null || response.equals("terminate")){
             return null;
         }
+
+        System.arraycopy(QoS,0,iv,12,1);
+
         String[] respDataParts = DataPacket.parse(response);
         byte[] decodedMsg = Base64.getDecoder().decode(respDataParts[0]);
         byte[] decryptedMsg = CCMPImpl.decrypt(decodedMsg,PTK.TK,iv);

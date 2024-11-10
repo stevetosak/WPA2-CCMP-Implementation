@@ -159,12 +159,12 @@ public class ClientHandler extends Thread {
             while (true) {
                 ByteUtil.incrementBytes(packetNumber);
 
-                byte[] iv = new byte[16];
-                System.arraycopy(packetNumber, 0, iv, 0, 6);
-                System.arraycopy(SNonce, 0, iv, 6, 10);
+                byte[] nonce = new byte[16];
+                System.arraycopy(packetNumber, 0, nonce, 0, 6);
+                System.arraycopy(CLIENT_MAC_ADDRESS.getBytes(),0,nonce,6,6);
 
 
-               String receivedMessage = encryptedNetworkContext.receiveAndDecryptMessage(in,iv);
+               String receivedMessage = encryptedNetworkContext.receiveAndDecryptMessage(in,nonce);
 
 
                 if (receivedMessage.equals("exit") || receivedMessage.equals("terminate")) {
@@ -176,7 +176,7 @@ public class ClientHandler extends Thread {
                 String responseMsg = "Successfully Received Message from Address: "
                         + CLIENT_MAC_ADDRESS + " Packet Number: " + ByteUtil.convertBytesToHex(packetNumber);
 
-                encryptedNetworkContext.encryptAndSendMessage(out,iv,packetNumber,responseMsg);
+                encryptedNetworkContext.encryptAndSendMessage(out,nonce,packetNumber,responseMsg);
 
             }
 
