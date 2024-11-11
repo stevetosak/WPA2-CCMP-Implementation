@@ -1,9 +1,7 @@
-package util;
+package server;
 
 import org.apache.logging.log4j.Logger;
-import server.CCMPImpl;
-import server.DataPacket;
-import server.PTKWrapper;
+import util.ByteUtil;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -41,7 +39,6 @@ public class EncryptedNetworkContext {
 
         DataPacket respDataPacket = new DataPacket();
 
-        //message = "hehe smenato e";
         byte[] encryptedMsg = CCMPImpl.encrypt(message.getBytes(),PTK.TK,nonce);
 
         byte [] encryptedMIC = CCMPImpl.encrypt(respMIC,PTK.TK,nonce);

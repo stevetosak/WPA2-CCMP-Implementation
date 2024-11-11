@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import util.ByteUtil;
-import util.EncryptedNetworkContext;
 
 import java.io.*;
 import java.net.Socket;

@@ -2,7 +2,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import server.*;
 import util.ByteUtil;
-import util.EncryptedNetworkContext;
+import server.EncryptedNetworkContext;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,10 +10,8 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Random;
 
 public class SocketClient {
-
 
     public static String getMacAddress() {
         try {
